@@ -1,0 +1,321 @@
+---
+title-meta: "Fichas cierre SINADA"
+author-meta: Sefa
+date-meta: \today
+lang: es
+documentclass: article
+classoption: oneside
+keywords: informe, r studio, r markdown, fichas
+geometry:
+- top=2cm
+- left=2.5cm
+- right=2.5cm
+- bottom=3.5cm
+papersize: a4
+fontsize: 10pt
+header-includes:
+- \usepackage{lscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+- \newcommand{\Rlogo}{\protect\includegraphics[height=1.8ex,keepaspectratio]{Rlogo.png}}
+- \usepackage{floatrow}
+- \floatplacement{figure}{H}
+- \floatplacement{table}{H}
+- \floatsetup[figure]{capposition=top}
+- \floatsetup[table]{capposition=top}
+- \addtolength{\skip\footins}{1pc plus 2pt}
+- \usepackage{titlesec}
+- \titleformat*{\section}{\filright \normalsize \bfseries}
+- \titleformat*{\subsection}{\normalsize\bfseries}
+- \titleformat*{\subsubsection}{\normalsize\bfseries}
+- \renewcommand{\thesection}{\Roman{section}}
+- \renewcommand{\thesubsection}{\Alph{subsection}}
+- \usepackage{helvet}
+- \renewcommand{\familydefault}{\sfdefault}
+- \usepackage{colortbl}
+- \usepackage{array}
+- \usepackage{graphicx}
+- \usepackage{hhline,colortbl}
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \setlength{\headheight}{67pt}
+- \fancyhf{}
+- \renewcommand{\headrulewidth}{0pt}
+- \fancyhead[C]{\setlength{\arrayrulewidth}{0.35mm} \arrayrulecolor{white} \begin{tabular}
+  { | >{\arraybackslash}m{1cm} | >{\arraybackslash}m{1.2cm} | >{\arraybackslash}m{1.8cm}
+  | >{\arraybackslash}m{4.45cm} | >{\arraybackslash}m{5.6cm} |} \includegraphics[width=1cm]{peru}
+  & \cellcolor{red} \textcolor{white}{PERÚ} & \cellcolor[gray]{0.2} \scriptsize \textcolor{white}{Ministerio
+  del Ambiente} & \cellcolor[gray]{0.5} \scriptsize \textcolor{white}{Organismo de
+  Evaluación y Fiscalización Ambiental - OEFA} &  \cellcolor[gray]{0.5} \scriptsize
+  \textcolor{white}{Dirección de Políticas y Estrategias en Fiscalización Ambiental}
+  \\ \end{tabular}\\ \vspace{3mm}{\scriptsize "Decenio de la Igualdad de Oportunidades para mujeres y hombres"}\\ {\scriptsize "Año del Bicentenario del Perú{:} 200 años de Independencia"}} 
+- \fancyfoot[C]{\thepage}
+mainfont: helvet
+output:
+  pdf_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: no
+  word_document:
+    toc: no
+params:
+  denuncia2: SC-0357-2020
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+```
+
+```{r}
+# I. LIBRERIAS A UTILIZAR----
+
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+library(stringr)
+library(knitr)
+library(kableExtra)
+library(googledrive)
+library(googlesheets4)
+library(forcats)
+library(readxl)
+library(WriteXLS)
+library(readxl)
+library(openxlsx)
+library(huxtable)
+
+
+# II. DETERMINAR EL PERIODO DEL REPORTE ----
+som <- function(x) {
+  as.Date(format(x, "01-%m-%Y"))
+}
+Inicio <- Sys.Date()
+Mes_evaluado <- month(Inicio, label=TRUE, abbr = FALSE)
+Mes_evaluado <- str_to_lower(Mes_evaluado)
+MES_EVALUADO <- str_to_upper(Mes_evaluado)
+Mes_actual <- month(now(), label=TRUE, abbr = FALSE)
+Mes_actual <- str_to_lower(Mes_actual)
+
+# III. IMPORTAR INFORMACION DE LAS BASES DE DATOS----
+DERIVACIONES <- read_excel("DERIVACIONES.xlsx")
+CALCULADORA <- read_excel("CALCULADORA.xlsx")
+POI <- read_excel("POI.xlsx")
+
+# IV. LIMPIANDO LA DATA DE LA BASE DE DATOS----
+
+DERIVACIONES_1 <- select(
+  DERIVACIONES,
+  DENUNCIA = 'Código Sinada',
+  ACCION = 'Acciones adoptadas',
+  EFA = 'Destinatario',
+  RESPUESTA = 'Respuesta final',
+  SUPUESTO = 'Supuesto que concluye el seguimiento',
+  PROBLEMATICA = 'Persiste problemática',
+  HT_RPTA = 'Hoja de trámite de la respuesta',
+  FECHA_RPTA = 'Fecha de respuesta'
+)
+rm(DERIVACIONES)
+
+
+CALCULADORA_1 <- select(
+  CALCULADORA,
+  DENUNCIA = 'CODIGO_SINADA_FINAL',
+  DEPARTAMENTO = 'DEPARTAMAMENTO (automático)',
+  PROVINCIA = 'PROVINCIA (automático)',
+  DISTRITO = 'DISTRITO (automático)',
+  COMPONENTE = 'COMPONENTE',
+  AGENTE = 'AGENTE',
+  ACTIVIDAD = 'ACTIVIDAD',
+  EXTENSION = 'EXTENSIÓN',
+  UBICACION = 'UBICACIÓN',
+  OCURRENCIA = 'OCURRENCIA',
+  Resultado = 'Resultado',
+  Amerita_seguimiento = 'Amerita seguimiento',
+  Observaciones = 'Observaciones(opcional)',
+  Especialista = 'Especialista (obligatorio)',
+  Nombre_completo = 'Nombre_completo',
+  Para_emitir = 'GENERAR',
+  HT_TRASLADO = 'HT DE TRASLADO (obligatorio)',
+  Fecha_cierre = 'Fecha cierre',
+  Si_amerita = 'Si_amerita'
+)
+rm(CALCULADORA)
+
+# V. SELECCIONANDO PARAMETROS PARA LA REPRODUCCION DE FICHAS----
+
+denuncias <- select(
+  POI,
+  DENUNCIA = 'Código Sinada')
+denuncia2 <- params$denuncia2 #esto facilita la impresión masiva de reportes
+
+
+POIFINAL <- select(
+  POI,
+  DENUNCIA = 'Código Sinada',
+  DIAS = 'DT PENDIENTES'
+)
+
+LISTA <- filter(CALCULADORA_1, CALCULADORA_1$Para_emitir == "Si")
+DERIVACIONES_2 <- DERIVACIONES_1 %>% filter(SUPUESTO != 'No corresponde hacer seguimiento')
+
+
+POI <- POIFINAL %>% filter(DENUNCIA == denuncia2)
+DERIVACIONES_2 <- DERIVACIONES_2 %>% filter(DENUNCIA == denuncia2)
+CALCULADORA_2 <- LISTA %>% filter(DENUNCIA == denuncia2)
+
+
+DATOS_DENUNCIA <- data.frame(
+  "DENUNCIA" = CALCULADORA_2$DENUNCIA,
+  "Fecha_cierre_2" = as.character(CALCULADORA_2$Fecha_cierre, format="%d/%m/%Y"),
+  "Especialista" = CALCULADORA_2$Especialista,
+  "HT_TRASLADO" = CALCULADORA_2$HT_TRASLADO,
+  "Departamento" = CALCULADORA_2$DEPARTAMENTO,
+  "Provincia" = CALCULADORA_2$PROVINCIA,
+  "Distrito" = CALCULADORA_2$DISTRITO,
+  "Nombre_completo" = CALCULADORA_2$Nombre_completo,
+  "Si_amerita" = CALCULADORA_2$Si_amerita
+)
+
+DATOS_DENUNCIA2 <- distinct(DATOS_DENUNCIA)
+
+FECHA <- DATOS_DENUNCIA2$Fecha_cierre_2
+
+siamerita_0 <- mutate(DATOS_DENUNCIA2, siamerita1 = ifelse(DATOS_DENUNCIA2$Si_amerita == 'NO', 'No', ifelse(DATOS_DENUNCIA2$Si_amerita == 'SÍ', 'Sí', 'ERROR')))
+
+siamerita <- siamerita_0$siamerita1
+
+siamerita_3 <- mutate(siamerita_0, siamerita4 = ifelse(siamerita_0$siamerita1 == 'No', '.', ifelse(siamerita_0$siamerita1 == 'Sí', paste0(". La HT de traslado al equipo del Observatorio de Solución de Problemas Ambientales es: ", DATOS_DENUNCIA2$HT_TRASLADO, "."), 'ERROR')))
+
+complemento <- siamerita_3$siamerita4
+
+```
+
+\rightline{\footnotesize \textbf{`r DATOS_DENUNCIA2$HT_TRASLADO`}}
+\vspace{1mm}
+\centerline{\textbf{FICHA DE CIERRE DE DENUNCIA}}
+\vspace{3mm}
+\begin{tabular}
+{ p{5.5cm}  p{0.05cm}  p{7.5cm} }
+\textbf{Código Sinada} & : & \textbf{`r denuncia2`}\\
+& \\
+\textbf{Fecha de cierre de la denuncia$^1$} & : & {`r FECHA`}\\
+& \\
+\textbf{Tiempo transcurrido$^2$} & : & {`r POI$DIAS` días hábiles}\\
+& \\
+\textbf{Ubicación de la denuncia} & : & {`r DATOS_DENUNCIA2$Departamento`} / {`r DATOS_DENUNCIA2$Provincia`} / {`r DATOS_DENUNCIA2$Distrito`}\\
+& \\
+\textbf{Responsable del cierre$^3$} & : & {`r DATOS_DENUNCIA2$Nombre_completo`}\\
+& \\
+\textbf{Jefe del equipo} & : & {Willington Ortiz Mestanza}\\
+& \\
+\hline
+\end{tabular}
+\vspace{1mm}
+\normalsize
+
+\arrayrulecolor{black}
+
+
+```{r} 
+
+# VI. GENERANDO TABLAS DE LA FICHA----
+
+DERIVACIONES_3 <- mutate(DERIVACIONES_2, DOCUMENTO_REMITIDO = ifelse(DERIVACIONES_2$ACCION == 'Denuncia trasladada', 'Derivación', ifelse(DERIVACIONES_2$ACCION == 'Informa registro (sin requerimiento)', 'Conocimiento', 'Pedido de Información adicional')))
+
+DERIVACIONES_4 <- mutate(DERIVACIONES_3, CON_RPTA = ifelse(DERIVACIONES_3$SUPUESTO == 'Por Informe a OCI', 'No', 'Sí'))
+
+DERIVACIONES_5 <- mutate(DERIVACIONES_4, PERSI_PROBL = ifelse(DERIVACIONES_4$PROBLEMATICA == 'No', 'No', ifelse(DERIVACIONES_4$PROBLEMATICA == 'Si', 'Sí', DERIVACIONES_4$PROBLEMATICA)))
+
+
+primera_tabla <- data.frame(
+  "EFA" = DERIVACIONES_5$EFA,
+  "TIPO" = DERIVACIONES_5$DOCUMENTO_REMITIDO,
+  "RESPUESTA" = DERIVACIONES_5$CON_RPTA,
+  "SUPUESTO_CIERRE" = DERIVACIONES_5$SUPUESTO,
+  "PROBLEMATICA" = DERIVACIONES_5$PERSI_PROBL,
+  "HT_RPTA" = as.character(DERIVACIONES_5$HT_RPTA)
+)
+
+
+segunda_table <- data.frame(
+  "COMPONENTE" = CALCULADORA_2$COMPONENTE,
+  "AGENTE" = CALCULADORA_2$AGENTE,
+  "ACTIVIDAD" = CALCULADORA_2$ACTIVIDAD,
+  "EXTENSION" = CALCULADORA_2$EXTENSION,
+  "UBICACION" = CALCULADORA_2$UBICACION,
+  "OCURRENCIA" = CALCULADORA_2$OCURRENCIA,
+  "RESULTADO" = CALCULADORA_2$Resultado,
+  "SEGUIMIENTO" = CALCULADORA_2$Amerita_seguimiento,
+  "OBSERVACIONES" = CALCULADORA_2$Observaciones
+)
+
+
+```
+
+```{r}
+# Graficar tabla ----
+kable(primera_tabla, caption = "\\label{} Información de las EFA", align= "cccccc", format = "latex", escape = F, col.names = linebreak(c("\nEntidades de Fiscalización \nAmbiental (EFA)\n", "\nDocumento\nremitido$^4$", "\n¿Con\nrespuesta?$^5$", "\nSupuesto de cierre$^6$\n", "\n¿Persiste la\nproblemática?$^7$", "\nHT de respuesta\n"), align = "c")) %>%
+kable_styling(font_size = 7, bootstrap_options = "bordered", latex_options = "HOLD_position", full_width = FALSE) %>%
+column_spec(1 , latex_valign = "m", width = "3.7cm", border_left = TRUE) %>%
+column_spec(2 , latex_valign = "m", width = "2cm") %>%
+column_spec(3 , latex_valign = "m", width = "1.5cm") %>%
+column_spec(4 , latex_valign = "m", width = "2.7cm") %>%
+column_spec(5 , latex_valign = "m", width = "1.9cm") %>%
+column_spec(6 , latex_valign = "m", width = "2.4cm", border_right = TRUE) %>%
+row_spec(0, bold = TRUE, color = "black", background = "#d9d9d9", align = "c") 
+
+``` 
+
+```{r}
+# Graficar tabla ----
+kable(segunda_table, caption = "\\label{} Resultados de la calculadora", align= "ccccccccc", format = "latex", escape = F, col.names = linebreak(c("\nComponente\n", "\nAgente\n", "\nActividad\n", "\nExtensión\n", "\nUbicación\n", "\nOcurrencia\n", "\nResultado\n", "\nAmerita \nseguimiento\n", "\nObservaciones\n"), align = "c")) %>% kable_styling(font_size = 6, bootstrap_options = "bordered", latex_options = "HOLD_position", full_width = FALSE) %>%
+column_spec(1 , latex_valign = "m", width = "1.2cm", border_left = TRUE) %>%
+column_spec(2 , latex_valign = "m", width = "1.8cm") %>%
+column_spec(3 , latex_valign = "m", width = "2cm") %>%
+column_spec(4 , latex_valign = "m", width = "1.2cm") %>%
+column_spec(5 , latex_valign = "m", width = "1.2cm") %>%
+column_spec(6 , latex_valign = "m", width = "2cm") %>%
+column_spec(7 , latex_valign = "m", width = "1cm") %>%
+column_spec(8 , latex_valign = "m", width = "1.2cm") %>%
+column_spec(9 , latex_valign = "m", width = "1.8cm", border_right = TRUE) %>%
+row_spec(0, bold = TRUE, color = "black", background = "#d9d9d9", align = "c")
+
+```
+
+
+
+**Resultado: `r siamerita` amerita seguimiento `r complemento`**
+
+
+\newpage
+
+
+
+$^1$ La fecha de cierre de la denuncia coincide con la información registrada en las bases de datos de Sinada.
+
+$^2$ El tiempo transcurrido de la denuncia va desde la fecha de registro hasta la fecha de cierre.
+
+$^3$ El responsable del cierre es la persona que evaluó la acción que permite cerrar la denuncia. 
+
+$^4$ La columna “Documento remitido” hacen referencia al documento emitido por Sinada a través del cual se traslada la denuncia a una EFA. De acuerdo con su contenido y finalidad puede ser:
+
+*	Derivación, cuando se traslada la denuncia a la EFA solicitándole que informe sobre las acciones de fiscalización ambiental realizadas o pendientes a realizar.
+* Para conocimiento, cuando se remite la denuncia a la EFA sin solicitarle que informe acciones de fiscalización ambiental.
+
+
+$^5$ En la columna “¿Con respuesta?” se indica si la EFA ha respondido o no al documento remitido. Sólo se considera que una EFA ha respondido cuando su respuesta se encuentra en uno de los supuestos de cierre establecidos en las Reglas del Servicio de Información Nacional y Denuncias Ambientales.
+
+$^6$ La columna de “Supuesto de cierre” señala el supuesto de cierre por el que se da por atendida la denuncia. Este puede ser:
+
+* La EFA comunicó que programó una supervisión en un periodo de tiempo determinado.
+* La EFA comunicó que ha adoptado acciones para hacer frente a la problemática denunciada.
+* La EFA comunicó que no realizará acciones con relación a la problemática denunciada explicando los motivos de su decisión.
+* La EFA no ha respondido a las solicitudes de Sinada, por lo que se ha remitido un informe al Órgano de Control correspondiente.
+* Otros supuestos tales como: sustracción de materia, desistimiento del denunciante al tramite de la denuncia, entre otros.
+
+
+$^7$ Se precisa de acuerdo con la información recabada si la problemática persiste o no.
+
+
+
