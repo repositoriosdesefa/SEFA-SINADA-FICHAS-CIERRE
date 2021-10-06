@@ -6,4 +6,5 @@ Generación automatizada  de las fichas de cierre de denuncias atendidas en el S
 - DATA_GENERACION_CORREO.R : Código que importa y limpia la información de las bases de datos, reproduce las fichas de acuerdo al listado de denuncias cerradas y envía el correo avisando al equipo que fueron generadas.
 - Logo peru.png
 ## Observaciones
-Fueron eliminadas las lineas que contienen información sensible.
+Fueron eliminadas las lineas que contienen información sensible: 43 44 45 46 50 51 53 56 58 61 228 229 230 231 232 233 239 242.
+
