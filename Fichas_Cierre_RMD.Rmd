@@ -207,7 +207,7 @@ complemento <- siamerita_3$siamerita4
 & \\
 \textbf{Responsable del cierre$^3$} & : & {`r DATOS_DENUNCIA2$Nombre_completo`}\\
 & \\
-\textbf{Jefe del equipo} & : & {Willington Ortiz Mestanza}\\
+\textbf{Jefe del equipo} & : & {}\\
 & \\
 \hline
 \end{tabular}
