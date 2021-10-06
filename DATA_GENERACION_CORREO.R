@@ -74,14 +74,14 @@ write.xlsx(POI,file="POI.xlsx", sheetName="POI")
 CALCULADORA_FILTRADA <- select(
   CALCULADORA,
   DENUNCIA = 'CODIGO_SINADA_FINAL',
-  DEPARTAMENTO = 'DEPARTAMAMENTO (automático)',
-  PROVINCIA = 'PROVINCIA (automático)',
-  DISTRITO = 'DISTRITO (automático)',
+  DEPARTAMENTO = 'DEPARTAMAMENTO (automÃ¡tico)',
+  PROVINCIA = 'PROVINCIA (automÃ¡tico)',
+  DISTRITO = 'DISTRITO (automÃ¡tico)',
   COMPONENTE = 'COMPONENTE',
   AGENTE = 'AGENTE',
   ACTIVIDAD = 'ACTIVIDAD',
-  EXTENSION = 'EXTENSIÓN',
-  UBICACION = 'UBICACIÓN',
+  EXTENSION = 'EXTENSIÃ“N',
+  UBICACION = 'UBICACIÃ“N',
   OCURRENCIA = 'OCURRENCIA',
   Resultado = 'Resultado',
   Amerita_seguimiento = 'Amerita seguimiento',
@@ -104,9 +104,9 @@ DATOS_DENUNCIA2 <- distinct(DATOS_DENUNCIA)
 
 
 ## ESPECIALISTAS
-denuncias_karem <- DATOS_DENUNCIA2 %>% filter(ESPECIALISTA == "")
-karem_denuncias <- as.data.frame(denuncias_karem)
-write.xlsx(karem_denuncias,file="xlsx", sheetName="DATA")
+denuncias_especialistas <- DATOS_DENUNCIA2 %>% filter(ESPECIALISTA == "")
+especialistas_denuncias <- as.data.frame(denuncias_especialistas)
+write.xlsx(especialistas_denuncias,file="xlsx", sheetName="DATA")
 
 
 
@@ -127,7 +127,7 @@ denuncia2 <- select(
 
 denuncia2 <- denuncia2$denuncia2
 
-# Definir función para generación de reportes
+# Definir funciÃ³n para generaciÃ³n de reportes
 for ( i in denuncia2 ) {
   rmarkdown :: render ( "Fichas_Cierre_RMD.Rmd" ,
                         params  =  list(denuncia2=i),
@@ -147,16 +147,16 @@ Arriba <- add_image(
   align = c("right"))
 Cabecera <- md(Arriba)
 
-# II. Email: Pie de página ----
+# II. Email: Pie de pÃ¡gina ----
 Logo_Oefa <- add_image(
   file = "https://i.imgur.com/ImFWSQj.png",
   width = 280)
 Pie_de_pagina <- blocks(
   md(Logo_Oefa),
-  block_text(md("Avenida Faustino Sánchez Carrión N° 603, 607 y 615 - Jesús María"), align = c("center")),
-  block_text(md("Teléfonos: 204-9900 Anexo 7154"), align = c("center")),
+  block_text(md("Avenida Faustino SÃ¡nchez CarriÃ³n NÂ° 603, 607 y 615 - JesÃºs MarÃ­a"), align = c("center")),
+  block_text(md("TelÃ©fonos: 204-9900 Anexo 7154"), align = c("center")),
   block_text("www.oefa.gob.pe", align = c("center")),
-  block_text(md("**Síguenos** en nuestras redes sociales"), align = c("center")),
+  block_text(md("**SÃ­guenos** en nuestras redes sociales"), align = c("center")),
   block_social_links(
     social_link(
       service = "Twitter",
@@ -185,7 +185,7 @@ Pie_de_pagina <- blocks(
     )
   ),
   block_spacer(),
-  block_text(md("Imprime este correo electrónico sólo si es necesario. Cuidar el ambiente es responsabilidad de todos."), align = c("center"))
+  block_text(md("Imprime este correo electrÃ³nico sÃ³lo si es necesario. Cuidar el ambiente es responsabilidad de todos."), align = c("center"))
 )
 
 # III. Email: Cuerpo del mensaje ----
@@ -197,7 +197,7 @@ Cuerpo_del_mensaje <- blocks(
   md("
 Estimados,
 
-Las fichas de cierre con la información extraída de las bases de datos del Sinada y la calculadora de impacto de problemáticas fueron generadas con éxito.
+Las fichas de cierre con la informaciÃ³n extraÃ­da de las bases de datos del Sinada y la calculadora de impacto de problemÃ¡ticas fueron generadas con Ã©xito.
 Ustedes pueden acceder a las mismas desde el siguiente enlace:"
   ),
   md(c(cta_button)),
@@ -206,15 +206,15 @@ Ustedes pueden acceder a las mismas desde el siguiente enlace:"
 
 ***
 **Tener en cuenta:**
-- Este correo electrónico ha sido generado de manera automática por un archivo R Script.
+- Este correo electrÃ³nico ha sido generado de manera automÃ¡tica por un archivo R Script.
 - La carpeta compartida contiene las fichas de cierre por especialista.
-- Si la ficha una vez revisada no cuenta con errores, se deberá colocar en la matriz de la calculadora la opción: Sí, en la columna denominada Ficha elaborada.
-- En caso se encuentre con la opción: No, en la columna denominada Ficha elaborada, revisar que los campos en las matrices esten correctamente ingresados.
-- Modificar en el Siged la HT donde se ubicará la ficha de cierre, esto a través de la opción Modificar en la que se deberá colocar en el campo Título el siguiente párrafo: Ficha de cierre SC-XXXX-2020.
+- Si la ficha una vez revisada no cuenta con errores, se deberÃ¡ colocar en la matriz de la calculadora la opciÃ³n: SÃ­, en la columna denominada Ficha elaborada.
+- En caso se encuentre con la opciÃ³n: No, en la columna denominada Ficha elaborada, revisar que los campos en las matrices esten correctamente ingresados.
+- Modificar en el Siged la HT donde se ubicarÃ¡ la ficha de cierre, esto a travÃ©s de la opciÃ³n Modificar en la que se deberÃ¡ colocar en el campo TÃ­tulo el siguiente pÃ¡rrafo: Ficha de cierre SC-XXXX-2020.
      ")
 )
 
-# IV. Email: Composición ----
+# IV. Email: ComposiciÃ³n ----
 
 email <- compose_email(
   header = Cabecera,
@@ -224,7 +224,7 @@ email <- compose_email(
 )
 
 
-# Email: Envío ----
+# Email: EnvÃ­o ----
 Destinatarios <- c(
   ""
 )
